@@ -39,3 +39,6 @@ jackpot_vals <- readHTMLTable(url)[[18]] %>%
   mutate_all(funs(str_trim(., "left")))
 ```
 
+```{r}
+sessionInfo()
+```
