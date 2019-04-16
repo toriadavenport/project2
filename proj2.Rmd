@@ -1,0 +1,14 @@
+---
+title: 'Project 2'
+author: ''
+date: '`r format(Sys.time(), "%A, %B %d, %Y @ %X")`'
+output: 
+  html_document: 
+    theme: yeti
+    highlight: textmate
+    toc: true
+    toc_float: false
+    toc_depth: 4
+    code_folding: hide
+---
+
