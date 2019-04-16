@@ -206,12 +206,28 @@ $(document).ready(function () {
 
 
 <h1 class="title toc-ignore">Project 2</h1>
-<h4 class="date">Tuesday, April 16, 2019 @ 03:46:06 PM</h4>
+<h4 class="date">Tuesday, April 16, 2019 @ 03:56:16 PM</h4>
 
 </div>
 
+<div id="TOC">
+<ul>
+<li><a href="#setup">Setup</a></li>
+</ul>
+</div>
 
-
+<div id="setup" class="section level1">
+<h1>Setup</h1>
+<p>Packages:</p>
+<pre class="r"><code>library(dplyr)
+library(XML)
+library(stringr)</code></pre>
+<p>Initial Loading of Powerball dataset:</p>
+<pre class="r"><code>url &lt;- &quot;http://www.lottofactor.com/script/jackpot_history/draw_date/101&quot;
+jackpot_vals &lt;- readHTMLTable(url)[[18]] %&gt;% 
+  mutate_all(funs(str_replace(., pattern = &quot;Â&quot;, replacement = &quot;&quot;))) %&gt;% 
+  mutate_all(funs(str_trim(., &quot;left&quot;)))</code></pre>
+</div>
 
 
 
