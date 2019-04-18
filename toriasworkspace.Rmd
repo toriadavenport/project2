@@ -48,17 +48,54 @@ jackpot_vals <- readHTMLTable(url)[[18]] %>%
   mutate_all(funs(str_replace(., pattern = "Â", replacement = ""))) %>% 
   mutate_all(funs(str_trim(., "left")))
 
-jackpot_vals <- rename(jackpot_vals, Draw.Date = `Â Draw Date`)
+#renaming the variables
+jackpot_vals <- rename(jackpot_vals, drawdate = `Â Draw Date`)
+
+jackpot_vals <- rename(jackpot_vals, Change = `Â Change`)
+
+jackpot_vals <- rename(jackpot_vals, Jackpot.Amount = `Â Jackpot Amount`)
 
 # adjusting inflation
 inflation_adj <- inflation_adjust(2019)
 
-# creating new dataset
-winningnumbers %>% separate(Winning.Numbers, into = c("white1", "white2", "white3", "white4", "white5", "powerball"), sep = " ")
+# editing winning numbers
+winningnumbers <- winningnumbers %>% separate(Winning.Numbers, into = c("white1", "white2", "white3", "white4", "white5", "powerball"), sep = " ")
 
-jackpot_vals %>% separate("Draw.Date", into = c("drawday", "drawdate"), sep = " ")
+winningnumbers <- rename(winningnumbers, drawdate = Draw.Date)
+
+
+#editing jackpot vals to begin to create new dataset
+jackpot_vals <- jackpot_vals %>% separate("drawdate", into = c("drawday", "drawdate"), sep = " ")
+
+jackpot_vals$Change = gsub("\\$", "", jackpot_vals$Change)
+jackpot_vals$Change = gsub("Million", "", jackpot_vals$Change)
+
+jackpot_vals$Jackpot.Amount = gsub("\\$", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount = gsub("Million", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount <- as.numeric(jackpot_vals$Jackpot.Amount)
+
+jackpot_vals <- rename(jackpot_vals, jackpot_value = Jackpot.Amount)
+
+winningnumbers
+
+jackpot_vals
 
 ```
+
+Creating dataset "powerball"
+
+```{r}
+jackpot_vals$drawdate <- as.Date(jackpot_vals$drawdate, "%m/%d/%Y")
+jackpot_vals
+
+winningnumbers$drawdate <- as.Date(winningnumbers$drawdate, "%m/%d/%Y")
+winningnumbers
+
+powerball <- left_join(jackpot_vals, winningnumbers, by = "drawdate")
+powerball
+```
+
+
 
 
 Initial Loading of Population Data
