@@ -1,0 +1,86 @@
+---
+title: 'Project 2 (Maria)'
+author: 'Maria Christeson'
+date: 'Updated: `r format(Sys.time(), "%A, %B %d, %Y @ %X")`'
+output:
+  rmarkdown::html_document:
+    theme: lumen
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+<html>
+<body style="background-color:seashell;">
+
+
+```{r setup_chunk, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
+```
+```{r}
+devtools::install_github('thomasp85/gganimate')
+```
+
+
+```{r, package_chunk, echo = FALSE}
+# Load all packages here
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(readr)
+library(XML)
+library(stringr)
+library(ggthemes)
+library(tidyverse)
+library(moderndive)
+library(blscrapeR)
+library(tidyverse)
+library(tweenr)
+library(gganimate)
+```
+
+```{r}
+Powerball <- read_csv("WinningNumbers.csv")
+```
+
+```{r}
+url <- "http://www.lottofactor.com/script/jackpot_history/draw_date/101"
+jackpot_vals <- readHTMLTable(url)[[18]] %>% 
+  mutate_all(funs(str_replace(., pattern = "Â", replacement = ""))) %>% 
+  mutate_all(funs(str_trim(., "left")))
+```
+
+
+```{r}
+inflation_adj <- inflation_adjust(2019)
+
+inflation_adj
+
+```
+
+#Powerball Winning Numbers January 2010 
+```{r}
+drawdate <- c("2010-01-02", "2010-01-06", "2010-01-09", "2010-01-13", "2010-01-16", "2010-01-20", "2010-01-23", "2010-01-27", "2010-01-30")
+drawday <- c("Saturday", "Wednesday", "Saturday", "Wednesday", "Saturday", "Wednesday", "Saturday", "Wednesday", "Saturday")
+white1 <- c(3, 20, 20, 8, 7, 15, 15, 6, 6)
+white2 <- c(7, 27, 41, 11, 8, 32, 16, 15, 26)
+white3 <- c(23, 29, 44, 15, 23, 43, 20, 20, 35)
+white4 <- c(27, 56, 50, 32, 41, 44, 42, 26, 47)
+white5 <- c(42, 58, 54, 50, 55, 46, 53, 31, 48)
+powerball <- c(37, 31, 22, 27, 23, 19, 17, 9, 21)
+jackpot_value <- c(25, 20, 25, 30.4, 41.9, 53.4, 65, 77.5, 92.5)
+powerball <- data.frame(drawdate, drawday, white1, white2, white3, white4, white5, powerball, jackpot_value)
+
+
+
+```
+
+
+```{r}
+powerball
+```
+
+
+
+<html> 
+<body> 

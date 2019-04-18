@@ -1,5 +1,5 @@
 ---
-title: 'Project 2'
+title: 'Code for powerball dataset'
 author: ''
 date: '`r format(Sys.time(), "%A, %B %d, %Y @ %X")`'
 output: 
