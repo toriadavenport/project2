@@ -12,3 +12,33 @@ output:
     code_folding: hide
 ---
 
+```{r setup_chunk, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
+```
+
+
+#Setup
+
+
+Packages:
+
+```{r}
+library(dplyr)
+library(XML)
+library(stringr)
+library(ggplot2)
+```
+
+
+Initial Loading of Powerball dataset:
+
+```{r}
+url <- "http://www.lottofactor.com/script/jackpot_history/draw_date/101"
+jackpot_vals <- readHTMLTable(url)[[18]] %>% 
+  mutate_all(funs(str_replace(., pattern = "Â", replacement = ""))) %>% 
+  mutate_all(funs(str_trim(., "left")))
+```
+
+```{r}
+sessionInfo()
+```

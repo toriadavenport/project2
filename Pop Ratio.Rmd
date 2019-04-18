@@ -1,0 +1,126 @@
+---
+title: 'Project 2 Pop Ratio'
+author: ''
+date: '`r format(Sys.time(), "%A, %B %d, %Y @ %X")`'
+output: 
+  html_document: 
+    theme: yeti
+    highlight: textmate
+    toc: true
+    toc_float: false
+    toc_depth: 4
+    code_folding: hide
+---
+
+```{r setup_chunk, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
+```
+
+Packages:
+
+```{r}
+library(dplyr)
+library(XML)
+library(stringr)
+library(ggplot2)
+library(readxl)
+library(tidyr)
+library(devtools)
+library(ggtern)
+```
+
+#Population Ratios
+```{r}
+url <- "https://stat-jet-asu.github.io/DataScience1Private/datasets/gapminder_pop_data.xlsx"
+destfile <- "datasets.xlsx"
+download.file(url, destfile)
+pop_0_4 <- read_excel(destfile, sheet = 1)
+pop_5_9 <- read_excel(destfile, sheet = 2)
+pop_10_14 <- read_excel(destfile, sheet = 3)
+pop_15_19 <- read_excel(destfile, sheet = 4)
+pop_20_39 <- read_excel(destfile, sheet = 5)
+pop_40_59 <- read_excel(destfile, sheet = 6)
+pop_60_100 <- read_excel(destfile, sheet = 7)
+pop_tot_pop <- read_excel(destfile, sheet = 8)
+```
+
+```{r}
+population_0_4 <- rename(pop_0_4, "country" = "Total 0-4 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_0_4" = "population")
+population_5_9 <- rename(pop_5_9, "country" = "Total 5-9 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_5_9" = "population")
+population_10_14 <- rename(pop_10_14, "country" = "Total 10-14 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_10_14" = "population")
+
+population_0_14 <- semi_join(population_0_4, population_5_9, population_10_14, by = c("country", "year")) %>%
+  mutate(population_0_4$pop_0_4 + population_5_9$pop_5_9 + population_10_14$pop_10_14) %>%
+  rename("pct0to14" = "population_0_4$pop_0_4 + population_5_9$pop_5_9 + population_10_14$pop_10_14") %>%
+  select(-pop_0_4)
+
+population_15_19 <- rename(pop_15_19, "country" = "Total 15-19 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_15_19" = "population")
+population_20_39 <- rename(pop_20_39, "country" = "Total 20-39 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_20_39" = "population")
+population_40_59 <- rename(pop_40_59, "country" = "Total 40-59 years (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pop_40_59" = "population")
+
+population_15_59 <- semi_join(population_15_19, population_20_39, population_40_59, by = c("country", "year")) %>%
+  mutate(population_15_19$pop_15_19 + population_20_39$pop_20_39 + population_40_59$pop_40_59) %>%
+  rename("pct15to59" = "population_15_19$pop_15_19 + population_20_39$pop_20_39 + population_40_59$pop_40_59") %>%
+  select(-pop_15_19)
+
+population_60_plus <- rename(pop_60_100, "country" = "Total above 60 (%)") %>%
+  gather("year", "population", 2:22) %>%
+  rename("pct60plus" = "population")
+
+population_0_59 <- full_join(population_0_14, population_15_59, by = c("country", "year"))
+
+population <- full_join(population_0_59, population_60_plus, by = c("country", "year")) %>%
+  mutate(pct0to14 / pct15to59) %>%
+  rename("cdr" = "pct0to14/pct15to59") %>%
+  mutate(pct60plus / pct15to59) %>%
+  rename("odr" = "pct60plus/pct15to59") %>%
+  mutate((pct0to14 + pct60plus) / pct15to59) %>%
+  rename("tdr" = "(pct0to14 + pct60plus)/pct15to59")
+
+glimpse(population)
+```
+
+```{r}
+population_usa <- filter(population, country == "United States")
+ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
+  geom_point(aes(size = year, color = year < 2020), shape = 20) +
+  ggtitle("Age Groups Over Time In USA") +
+  labs(x = "0 to 14",
+       y = "15 to 59",
+       z = "60 plus") +
+  theme_zoom_R() +
+  theme(legend.justification = c(1, 1))
+  
+population_usa <- filter(population, country == "Slovenia")
+ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
+  geom_point(aes(size = year, color = year < 2020), shape = 20) +
+  ggtitle("Age Groups Over Time In Slovania") +
+  labs(x = "0 to 14",
+       y = "15 to 59",
+       z = "60 plus") +
+  theme_zoom_R() +
+  theme(legend.justification = c(1, 1))
+  
+```
+
+Create one or more visualizations to display and compare the projected 2020 dependency ratios for all countries. Use annotations or some other appropriate method to highlight at least one feature in the data you think might be interesting or noteworthy to an audience concerned about these issues. You may research other variables of interest to add to your visualizations if you choose.
+
+```{r}
+population_2020 <- population %>%
+  filter(year == 2020)
+
+ggplot(population_2020) +
+  geom_point(aes(x = tdr, y = country))
+```
