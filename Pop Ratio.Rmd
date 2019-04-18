@@ -14,6 +14,7 @@ output:
 
 ```{r setup_chunk, echo = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
+devtools::install_github("dgrtwo/gganimate")
 ```
 
 Packages:
@@ -27,6 +28,8 @@ library(readxl)
 library(tidyr)
 library(devtools)
 library(ggtern)
+library(gapminder)
+library(gganimate)
 ```
 
 #Population Ratios
@@ -95,23 +98,30 @@ glimpse(population)
 ```{r}
 population_usa <- filter(population, country == "United States")
 ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
-  geom_point(aes(size = year, color = year < 2020), shape = 20) +
+  geom_point(aes(color = year, shape = year < 2020), size = 3) +
+  scale_shape_manual(values=c(1, 20),
+                     labels = c("Predicted", "Recorded")) +
   ggtitle("Age Groups Over Time In USA") +
   labs(x = "0 to 14",
        y = "15 to 59",
        z = "60 plus") +
   theme_zoom_R() +
-  theme(legend.justification = c(1, 1))
+  theme(legend.justification = c(1, 1)) +
+  labs(shape = "Prediction vs. Recorded", colour = "Year") 
+  
   
 population_usa <- filter(population, country == "Slovenia")
 ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
-  geom_point(aes(size = year, color = year < 2020), shape = 20) +
+  geom_point(aes(color = year, shape = year < 2020), size = 3) +
+  scale_shape_manual(values=c(1, 20),
+                     labels = c("Predicted", "Recorded")) +
   ggtitle("Age Groups Over Time In Slovania") +
   labs(x = "0 to 14",
        y = "15 to 59",
        z = "60 plus") +
   theme_zoom_R() +
-  theme(legend.justification = c(1, 1))
+  theme(legend.justification = c(1, 1)) +
+  labs(shape = "Prediction vs. Recorded", colour = "Year")
   
 ```
 
@@ -119,8 +129,41 @@ Create one or more visualizations to display and compare the projected 2020 depe
 
 ```{r}
 population_2020 <- population %>%
-  filter(year == 2020)
+  filter(year == 2020) 
 
 ggplot(population_2020) +
   geom_point(aes(x = tdr, y = country))
+
+letters <- c('A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A',
+             'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 
+             'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 
+             'D', 'D', 'D',
+             'E', 'E', 'E', 'E', 'E', 'E', 'E',
+             'F', 'F', 'F', 'F', 'F', 
+             'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 
+             'H', 'H', 'H', 'H',
+             'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 
+             'J', 'J', 'J', 
+             'K', 'K', 'K', 'K', 'K', 'K', 
+             'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 
+             'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M',
+             'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N',
+             'O',
+             'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 'P', 
+             'Q',
+             'R', 'R', 'R', 'R',
+             'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 'S', 
+             'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 'T', 
+             'U', 'U', 'U', 'U', 'U', 'U', 'U', 
+             'V', 'V', 'V', 'V', 
+             'W', 'W',
+             'Y',
+             'Z', 'Z')
+
+pop_2020_let <- data_frame(population_2020, letters)
+
+ggplot(pop_2020_let, aes(population_2020.year, size = population_2020.tdr, color = population_2020.country, frame = letters)) +
+  geom_point() +
+  scale_x_log10() +
+  theme_bw()
 ```
