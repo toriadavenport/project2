@@ -117,3 +117,10 @@ ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
 
 Create one or more visualizations to display and compare the projected 2020 dependency ratios for all countries. Use annotations or some other appropriate method to highlight at least one feature in the data you think might be interesting or noteworthy to an audience concerned about these issues. You may research other variables of interest to add to your visualizations if you choose.
 
+```{r}
+population_2020 <- population %>%
+  filter(year == 2020)
+
+ggplot(population_2020) +
+  geom_point(aes(x = tdr, y = country))
+```
