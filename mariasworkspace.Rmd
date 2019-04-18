@@ -1,0 +1,39 @@
+---
+title: 'Project 2 (Maria)'
+author: 'Maria Christeson'
+date: 'Updated: `r format(Sys.time(), "%A, %B %d, %Y @ %X")`'
+output:
+  rmarkdown::html_document:
+    theme: lumen
+    toc: true
+    toc_float: true
+    code_folding: hide
+---
+
+<html>
+<body style="background-color:seashell;">
+
+
+```{r setup_chunk, echo = FALSE}
+knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
+```
+
+```{r, package_chunk, echo = FALSE}
+# Load all packages here
+library(ggplot2)
+library(dplyr)
+library(tidyr)
+library(ggthemes)
+library(tidyverse)
+library(moderndive)
+```
+
+
+
+
+
+
+
+
+<html> 
+<body> 
