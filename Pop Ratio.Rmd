@@ -14,7 +14,7 @@ output:
 
 ```{r setup_chunk, echo = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
-devtools::install_github("dgrtwo/gganimate")
+devtools::install_github('thomasp85/gganimate', force = TRUE)
 ```
 
 Packages:
@@ -30,6 +30,8 @@ library(devtools)
 library(ggtern)
 library(gapminder)
 library(gganimate)
+library(ggplot2)
+library(ggrepel)
 ```
 
 #Population Ratios
@@ -125,26 +127,18 @@ ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
   
 ```
 
-Create one or more visualizations to display and compare the projected 2020 dependency ratios for all countries. Use annotations or some other appropriate method to highlight at least one feature in the data you think might be interesting or noteworthy to an audience concerned about these issues. You may research other variables of interest to add to your visualizations if you choose.
-
 ```{r}
-population_2020 <- population %>%
-  filter(year == 2020) 
-
-ggplot(population_2020) +
-  geom_point(aes(x = tdr, y = country))
-
-letters <- c('A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A',
-             'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 'B', 
-             'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 'C', 
-             'D', 'D', 'D',
-             'E', 'E', 'E', 'E', 'E', 'E', 'E',
-             'F', 'F', 'F', 'F', 'F', 
-             'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 'G', 
-             'H', 'H', 'H', 'H',
-             'I', 'I', 'I', 'I', 'I', 'I', 'I', 'I', 
-             'J', 'J', 'J', 
-             'K', 'K', 'K', 'K', 'K', 'K', 
+letters <- c("A", "A", "A", "A", "A", "A", "A", "A", "A", "A",
+             "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", "B", 
+             "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", "C", 
+             "D", "D", "D",
+             "E", "E", "E", "E", "E", "E", "E",
+             "F", "F", "F", "F", "F", 
+             "G", "G", "G", "G", "G", "G", "G", "G", "G", "G", "G", "G", "G", 
+             "H", "H", "H", "H",
+             "I", "I", "I", "I", "I", "I", "I", "I", 
+             "J", "J", "J", 
+             "K", 'K', 'K', 'K', 'K', 'K', 
              'L', 'L', 'L', 'L', 'L', 'L', 'L', 'L', 
              'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M', 'M',
              'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N', 'N',
@@ -159,11 +153,24 @@ letters <- c('A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A', 'A',
              'W', 'W',
              'Y',
              'Z', 'Z')
+letter <- gsub('', "", letters) %>%
+  as.character()
+```
 
-pop_2020_let <- data_frame(population_2020, letters)
+Create one or more visualizations to display and compare the projected 2020 dependency ratios for all countries. Use annotations or some other appropriate method to highlight at least one feature in the data you think might be interesting or noteworthy to an audience concerned about these issues. You may research other variables of interest to add to your visualizations if you choose.
 
-ggplot(pop_2020_let, aes(population_2020.year, size = population_2020.tdr, color = population_2020.country, frame = letters)) +
-  geom_point() +
-  scale_x_log10() +
-  theme_bw()
+```{r}
+population_2020 <- population %>%
+  filter(year == 2020) 
+
+
+
+pop_2020_let <- cbind(letter, population_2020) 
+
+p <- ggplot(pop_2020_let, aes(x = tdr, y = letter, group = letter)) +
+  geom_point(size = 1) +
+  geom_point(color = "blue", alpha = .2) +
+  geom_text_repel(aes(label = country), size = 2)
+p
+
 ```
