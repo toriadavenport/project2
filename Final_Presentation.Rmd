@@ -1,0 +1,76 @@
+---
+title: "Data Science 1 Project"
+author: "Julia Urh, Maria Christeson, Toria Davenport"
+date: '`r format(Sys.time(), "%B %d, %Y @ %I:%M %p")`'
+output: ioslides_presentation
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(warning = FALSE, message = FALSE)
+```
+
+# Section 1: Jackpot! 
+
+## What *is* the powerball lottery?:
+
+* information or whatever
+
+
+## Values of the Lottery Over Time: Background
+
++ Choices made
+
++ blah blah 
+
+## Values of the Lottery Over Time
+
+```{r, echo = FALSE}
+#Maria's plots here. We have to include explanations for the choices we made as well. 
+```
+
+
+## Fairness and Independence of Winning Numbers: Background
+
++ blah
+
++ blah blah
+
+## Fairness and Independence of Winning Numbers
+
+```{r, echo = FALSE}
+#Toria's plots here. We have to include explanations for the choices we made as well.
+```
+
+
+# Section 2: Population Ratios
+
+## Background!
+
+Any background info or blurbs Julia wants to say here
+
+## Age ternary plots: Background
+
++ Choices made
+
++ blah blah 
+
+## Age ternary plots
+
+```{r, echo = FALSE}
+#Julia's plots here. We have to include explanations for the choices we made as well.
+```
+
+## Dependency Ratios: Background
+
++ choices
+
++ blah
+
+## Dependency Ratios: Background
+
+```{r, echo = FALSE}
+#Julia's other plots here 
+```
+
+
+# Conclusions
