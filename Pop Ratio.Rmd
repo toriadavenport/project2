@@ -32,6 +32,11 @@ library(gapminder)
 library(gganimate)
 library(ggplot2)
 library(ggrepel)
+library(tidyverse)
+library(rvest)
+library(magrittr)
+library(ggmap)
+library(stringr)
 ```
 
 #Population Ratios
@@ -173,4 +178,88 @@ p <- ggplot(pop_2020_let, aes(x = tdr, y = letter, group = letter)) +
   geom_text_repel(aes(label = country), size = 2)
 p
 
+```
+
+```{r}
+map.world <- map_data("world")
+                      
+map.world.c <- map.world %>%
+  rename("country" = "region")
+joined_country <- semi_join(population_2020, map.world.c, by = "country")
+j_country <- pull(joined_country, country)
+oh_no <- anti_join(population_2020, map.world.c, by = "country")
+
+pop_2020_good <- population_2020 %>%
+  mutate(country = case_when(country == 'Central African Rep.' ~ 'Central African Republic',
+                             country == 'Congo, Dem. Rep.' ~ 'Democratic Republic of the Congo',
+                             country == 'Congo, Rep.' ~ 'Republic of Congo',
+                             country == "Cote d'Ivoire" ~ "Ivory Coast",
+                             country == "Czech Rep." ~ "Czech Republic",
+                             country == "Dominican Rep." ~ "Dominican Republic",
+                             country == "Korea, Dem. Rep." ~ "North Korea",
+                             country == "Korea, Rep." ~ "South Korea",
+                             country == "Macedonia, FYR" ~ "Macedonia",
+                             country == "Micronesia, Fed. Sts." ~ "Micronesia",
+                             country == "Saint Vincent and the Grenadines" ~ "Saint Vincent",
+                             country == "Slovak Republic" ~ "Slovakia",
+                             country == "Trinidad and Tobago" ~ "Trinidad",
+                             country == "United Kingdom" ~ "UK",
+                             country == "United States" ~ "USA",
+                             country == "Virgin Islands (U.S.)" ~ "Virgin Islands",
+                             country == "Yemen, Rep." ~ "Yemen",
+                             country %in% (j_country) ~ country
+                             )) %>%
+  filter(country != is.na(country))
+
+map.world_joined <- left_join(map.world.c, pop_2020_good, by = 'country')
+ggplot() +
+  geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = tdr)) +
+  theme_void() + 
+  labs(title = 'Total Dependancy Ratios of World Countries') +
+  theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
+        ,panel.background = element_rect(fill = "#444444")
+        ,plot.background = element_rect(fill = "#444444")
+        ,panel.grid = element_blank()
+        ,plot.title = element_text(size = 20)
+        ,plot.subtitle = element_text(size = 10)
+        ,axis.text = element_blank()
+        ,axis.title = element_blank()
+        ,axis.ticks = element_blank()
+        ,legend.position = "none"
+        )
+
+ggplot() +
+  geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = cdr)) +
+  theme_void() + 
+  labs(title = 'Child Dependancy Ratios of World Countries') +
+  theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
+        ,panel.background = element_rect(fill = "#444444")
+        ,plot.background = element_rect(fill = "#444444")
+        ,panel.grid = element_blank()
+        ,plot.title = element_text(size = 20)
+        ,plot.subtitle = element_text(size = 10)
+        ,axis.text = element_blank()
+        ,axis.title = element_blank()
+        ,axis.ticks = element_blank()
+        ,legend.position = "none"
+        )
+ggplot() +
+  geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = odr)) +
+  theme_void() + 
+  labs(title = 'Older Dependancy Ratios of World Countries') +
+  theme(text = element_text(family = "Gill Sans", color = "#FFFFFF")
+        ,panel.background = element_rect(fill = "#444444")
+        ,plot.background = element_rect(fill = "#444444")
+        ,panel.grid = element_blank()
+        ,plot.title = element_text(size = 20)
+        ,plot.subtitle = element_text(size = 10)
+        ,axis.text = element_blank()
+        ,axis.title = element_blank()
+        ,axis.ticks = element_blank()
+        ,legend.position = "none"
+        )
+
+
+
+#drop channel islands, 	Hong Kong, China, Macao, China, Netherlands Antilles, West Bank and Gaza
 ```
