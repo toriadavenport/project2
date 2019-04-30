@@ -275,7 +275,9 @@ likelihood
 ## Fairness and Independence of Winning Numbers
 
 ```{r, echo = FALSE}
-likelihood <- ggplot(powerballfinal) +
+library(ggridges)
+
+likelihood <- ggplot(powerballfinal) + 
   labs(x = "Ball value", y = "Density", title = "Distribution of Winning Numbers", subtitle = "Based off of balltype; Year > 2009") +
   geom_vline(aes(xintercept=mean(white1)),
             color="aquamarine4", linetype="dashed", size=0.5) +
@@ -299,8 +301,6 @@ likelihood <- ggplot(powerballfinal) +
 
 likelihood
 ```
-
-
 
 # Section 2: Population Ratios
 
@@ -392,7 +392,9 @@ ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
   labs(shape = "Prediction vs. Recorded", colour = "Year") 
 ```  
 
-```{r}
+## Age ternary plots
+
+```{r, echo = FALSE}
 population_usa <- filter(population, country == "Slovenia")
 ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
   geom_point(aes(color = year, shape = year < 2020), size = 3) +
@@ -413,7 +415,8 @@ ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
 
 + blah
 
-## Dependency Ratios: Background
+## Dependency Ratios: 
+
 ```{r, include=FALSE}
 map.world <- map_data("world")
 population_2020 <- population %>%
@@ -447,6 +450,7 @@ pop_2020_good <- population_2020 %>%
   filter(country != is.na(country))
 ```
 
+
 ```{r, echo = FALSE}
 map.world_joined <- left_join(map.world.c, pop_2020_good, by = 'country')
 ggplot() +
@@ -466,6 +470,8 @@ ggplot() +
         ) 
 ```
 
+## Dependency Ratios: 
+
 ```{r, echo = FALSE}
 ggplot() +
   geom_polygon(data = map.world_joined, aes(x = long, y = lat, group = group, fill = cdr)) +
@@ -483,6 +489,8 @@ ggplot() +
         ,legend.position = "none"
         )
 ```
+
+## Dependency Ratios: 
 
 ```{r, echo = FALSE}
 ggplot() +
