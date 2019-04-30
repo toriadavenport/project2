@@ -183,10 +183,10 @@ library(lubridate)
 # Then you can create the xts format, and thus use dygraph
 don=xts(x = powerballfinal$jackpot_value, order.by = powerballfinal$drawdate)
 dygraph(don) %>%
-  dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="#D8AE5A") %>%
+  dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="pink") %>%
   dyRangeSelector(dateWindow = c("2010-01-01", "2019-05-09")) %>%
   dyCrosshair(direction = "vertical") %>%
   dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)  %>%
-  dyRoller(rollPeriod = 1)
+  dyRoller(rollPeriod = 1) 
 ```
 
