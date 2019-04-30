@@ -305,6 +305,31 @@ likelihood
 ```
 
 
+```{r}
+likelihood <- ggplot(powerballfinal) +
+  labs(x = "Ball value", y = "Density", title = "Distribution of Winning Numbers", subtitle = "Based off of balltype; Year > 2009") +
+  geom_vline(aes(xintercept=mean(white1)),
+            color="aquamarine4", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white1), y = 0.041, label = "White 1"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white2)),
+            color="purple", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white2), y = 0.041, label = "White 2"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white3)),
+            color="darkred", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white3), y = 0.041, label = "White 3"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white4)),
+            color="green", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white4), y = 0.041, label = "White 4"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white5)),
+            color="black", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white5), y = 0.041, label = "White 5"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(powerball)),
+            color="deeppink2", linetype="dashed", size= 0.25) +
+  geom_text(aes(x = mean(powerball), y = 0.021, label = "Powerball"), color = "black" ) +
+  theme_classic() 
+
+likelihood
+```
 
 
 
