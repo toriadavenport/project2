@@ -11,9 +11,127 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 
 # Section 1: Jackpot! 
 
+```{r, include=FALSE}
+#Loading of datasets
+library(dplyr)
+library(XML)
+library(stringr)
+library(blscrapeR)
+library(openxlsx)
+library(tidyr)
+library(lubridate)
+
+#loading winning numbers dataset
+winningnumbers <- read.csv("https://data.ny.gov/api/views/d6yy-54nr/rows.csv?accessType=DOWNLOAD")
+
+#winningnumbers
+
+#loading jackpot vals
+url <- "http://www.lottofactor.com/script/jackpot_history/draw_date/101"
+
+jackpot_vals <- readHTMLTable(url)[[18]] %>% 
+  mutate_all(funs(str_replace(., pattern = "Â", replacement = ""))) %>% 
+  mutate_all(funs(str_trim(., "left")))
+
+#renaming the variables
+jackpot_vals <- rename(jackpot_vals, drawdate = `Â Draw Date`)
+
+jackpot_vals <- rename(jackpot_vals, Change = `Â Change`)
+
+jackpot_vals <- rename(jackpot_vals, Jackpot.Amount = `Â Jackpot Amount`)
+
+# adjusting inflation
+inflation_adj <- inflation_adjust(2019)
+
+# editing winning numbers
+winningnumbers <- winningnumbers %>% separate(Winning.Numbers, into = c("white1", "white2", "white3", "white4", "white5", "powerball"), sep = " ")
+
+winningnumbers <- rename(winningnumbers, drawdate = Draw.Date)
+
+
+#editing jackpot vals to begin to create new dataset
+jackpot_vals <- jackpot_vals %>% separate("drawdate", into = c("drawday", "drawdate"), sep = " ")
+
+jackpot_vals$Change = gsub("\\$", "", jackpot_vals$Change)
+jackpot_vals$Change = gsub("Million", "", jackpot_vals$Change)
+
+jackpot_vals$Jackpot.Amount = gsub("\\$", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount = gsub("Million", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount <- as.numeric(jackpot_vals$Jackpot.Amount)
+
+jackpot_vals <- rename(jackpot_vals, jackpot_value = Jackpot.Amount)
+
+#winningnumbers
+
+#jackpot_vals
+
+jackpot_vals$drawdate <- as.Date(jackpot_vals$drawdate, "%m/%d/%Y")
+#jackpot_vals
+
+winningnumbers$drawdate <- as.Date(winningnumbers$drawdate, "%m/%d/%Y")
+#winningnumbers
+
+jackpot_vals$drawdate <- ymd(jackpot_vals$drawdate)
+jackpot_vals <- jackpot_vals %>%
+  select(-Change)
+
+#adding 2010 data
+winningnumbers$drawdate <- ymd(winningnumbers$drawdate)
+winningnumbers <- winningnumbers %>%
+  select(-Multiplier)
+drawdate <- c("2010-01-02", "2010-01-06", "2010-01-09", "2010-01-13", "2010-01-16", "2010-01-20", "2010-01-23", "2010-01-27", "2010-01-30")
+white1 <- c(3, 20, 20, 8, 7, 15, 15, 6, 6)
+white2 <- c(7, 27, 41, 11, 8, 32, 16, 15, 26)
+white3 <- c(23, 29, 44, 15, 23, 43, 20, 20, 35)
+white4 <- c(27, 56, 50, 32, 41, 44, 42, 26, 47)
+white5 <- c(42, 58, 54, 50, 55, 46, 53, 31, 48)
+powerball <- c(37, 31, 22, 27, 23, 19, 17, 9, 21)
+
+powerball2 <- data.frame(drawdate, white1, white2, white3, white4, white5, powerball)
+powerball2$drawdate <- as.Date(powerball2$drawdate)
+powerball2$drawdate <- ymd(powerball2$drawdate)
+
+winningnumbers$white1 <- as.numeric(winningnumbers$white1)
+winningnumbers$white2 <- as.numeric(winningnumbers$white2)
+winningnumbers$white3 <- as.numeric(winningnumbers$white3)
+winningnumbers$white4 <- as.numeric(winningnumbers$white4)
+winningnumbers$white5 <- as.numeric(winningnumbers$white5)
+winningnumbers$powerball <- as.numeric(winningnumbers$powerball)
+#winningnumbers
+
+powerball1 <- rbind(winningnumbers, powerball2)
+#powerball1
+
+jackpot_vals <- jackpot_vals
+
+powerball <- left_join(powerball1, jackpot_vals, by = "drawdate")
+#powerball
+
+powerball <- powerball %>%
+  mutate(year = substr(drawdate, 1, 4))
+#powerball
+
+
+#adjusting inflation pt. 2
+inflation_adj <- inflation_adjust(2019)
+
+inflation_adj <- inflation_adj%>%
+  select(-avg_cpi, -base_year, -pct_increase)
+
+#inflation_adj
+
+powerball <- left_join(powerball, inflation_adj, by = "year", match = "all")
+
+powerballfinal <- powerball %>%
+  mutate(jackpot_value_adj = (jackpot_value / adj_value))
+
+#powerballfinal
+```
+
+
 ## What *is* the powerball lottery?:
 
-* information or whatever
++ The numbers available  for the white balls were **below *50* from the start until approximately 2001**, **below *60* until 2014**, and became ***69* in 2015**. The powerball options show the opposite pattern, where they were **above *40* until 2009**, **above *30* until 2014**, and ***26* afterwards.**
 
 
 ## Values of the Lottery Over Time: Background
@@ -25,20 +143,117 @@ knitr::opts_chunk$set(warning = FALSE, message = FALSE)
 ## Values of the Lottery Over Time
 
 ```{r, echo = FALSE}
-#Maria's plots here. We have to include explanations for the choices we made as well. 
+# Library
+library(dygraphs)
+library(xts)          # To make the convertion data-frame / xts format
+library(tidyverse)
+library(lubridate)
+
+
+# Then you can create the xts format, and thus use dygraph
+don=xts(x = powerballfinal$jackpot_value, order.by = powerballfinal$drawdate)
+dygraph(don) %>%
+  dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="#D8AE5A") %>%
+  dyRangeSelector(dateWindow = c("2010-01-01", "2019-05-09")) %>%
+  dyCrosshair(direction = "vertical") %>%
+  dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)  %>%
+  dyRoller(rollPeriod = 1)
 ```
 
 
 ## Fairness and Independence of Winning Numbers: Background
 
-+ blah
++ Objectives
 
-+ blah blah
+    + Detect patterns in winning numbers
+    
+    + Compare the winning numbers over time 
+    
++ Plots
+
+    + Scatterplots to show basic patterns with time color-coded
+    
+    + Density plots for the patterns most easily detected in the scatterplot
+    
+    + Combined density plot to show differences between/relationships with the winning numbers for different balls
 
 ## Fairness and Independence of Winning Numbers
 
 ```{r, echo = FALSE}
-#Toria's plots here. We have to include explanations for the choices we made as well.
+library(ggplot2)
+
+ggplot(powerballfinal, aes(x = drawdate, y = white1, col = drawdate)) +
+  geom_point() +
+  theme_classic()
+```
+
+## Fairness and Independence of Winning Numbers
+
+```{r, echo = FALSE}
+ggplot(powerballfinal, aes(x = drawdate, y = white5, col = drawdate)) +
+  geom_point() +
+  theme_classic()
+```
+
+## Fairness and Independence of Winning Numbers
+
+```{r, echo = FALSE}
+p1 <- ggplot(powerballfinal, aes(x = white5, col = drawdate)) +
+  geom_density(aes(col = drawdate)) +
+  theme_classic()
+
+p1+ geom_vline(aes(xintercept=mean(white5)),
+            color="blue", linetype="dashed", size=1)
+```
+
+
+## Fairness and Independence of Winning Numbers
+
+```{r, echo = FALSE}
+p2 <- ggplot(powerballfinal, aes(x = white1, fill = drawdate)) +
+  geom_density() +
+  theme_classic()
+
+p2+ geom_vline(aes(xintercept=mean(white1)),
+            color="blue", linetype="dashed", size=1)
+
+```
+
+
+## Fairness and Independence of Winning Numbers
+
+```{r, echo = FALSE}
+library(ggridges)
+
+likelihood <- ggplot(powerballfinal) + 
+  geom_density(aes(x = white1), color = "aquamarine4") +
+  geom_density(aes(x = white2), color = "purple") +
+  geom_density(aes(x = white3), color = "darkred") + 
+  geom_density(aes(x = white4), color = "green") +
+  geom_density(aes(x = white5)) +
+  geom_density(aes(x = powerball), color = "deeppink2") +
+  labs(x = "Ball value", y = "Density", title = "Distribution of Winning Numbers", subtitle = "Based off of balltype; Year > 2009") +
+  geom_vline(aes(xintercept=mean(white1)),
+            color="aquamarine4", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white1), y = 0.041, label = "White 1"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white2)),
+            color="purple", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white2), y = 0.041, label = "White 2"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white3)),
+            color="darkred", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white3), y = 0.041, label = "White 3"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white4)),
+            color="green", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white4), y = 0.041, label = "White 4"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(white5)),
+            color="black", linetype="dashed", size=0.5) +
+  geom_text(aes(x = mean(white5), y = 0.041, label = "White 5"), color = "black" ) +
+  geom_vline(aes(xintercept=mean(powerball)),
+            color="deeppink2", linetype="dashed", size= 0.25) +
+  geom_text(aes(x = mean(powerball), y = 0.021, label = "Powerball"), color = "black" ) +
+  theme_classic() 
+
+likelihood
 ```
 
 
@@ -55,6 +270,11 @@ Any background info or blurbs Julia wants to say here
 + blah blah 
 
 ## Age ternary plots
+
+```{r, include = FALSE}
+#dataset code here
+```
+
 
 ```{r, echo = FALSE}
 #Julia's plots here. We have to include explanations for the choices we made as well.
