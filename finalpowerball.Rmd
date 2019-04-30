@@ -166,5 +166,27 @@ powerballfinal <- powerball %>%
   mutate(jackpot_value_adj = (jackpot_value / adj_value))
 
 powerballfinal
+str(powerballfinal)
+```
+
+
+
+
+```{r}
+# Library
+library(dygraphs)
+library(xts)          # To make the convertion data-frame / xts format
+library(tidyverse)
+library(lubridate)
+
+
+# Then you can create the xts format, and thus use dygraph
+don=xts(x = powerballfinal$jackpot_value, order.by = powerballfinal$drawdate)
+dygraph(don) %>%
+  dyOptions(labelsUTC = TRUE, fillGraph=TRUE, fillAlpha=0.1, drawGrid = FALSE, colors="#D8AE5A") %>%
+  dyRangeSelector(dateWindow = c("2010-01-01", "2019-05-09")) %>%
+  dyCrosshair(direction = "vertical") %>%
+  dyHighlight(highlightCircleSize = 5, highlightSeriesBackgroundAlpha = 0.2, hideOnMouseOut = FALSE)  %>%
+  dyRoller(rollPeriod = 1)
 ```
 
