@@ -50,7 +50,7 @@ jackpot_vals <- readHTMLTable(url)[[18]] %>%
   mutate_all(funs(str_trim(., "left")))
 
 #renaming the variables
-jackpot_vals <- rename(jackpot_vals, drawdate = `Â Draw Date`)
+jackpot_vals <- rename(jackpot_vals, drawdate = `Â Draw Date`)
 
 jackpot_vals <- rename(jackpot_vals, Change = `Â Change`)
 

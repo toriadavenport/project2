@@ -17,9 +17,7 @@ output:
 ```{r setup_chunk, echo = FALSE}
 knitr::opts_chunk$set(message = FALSE, warning = FALSE, comment = "")
 ```
-```{r}
-devtools::install_github('thomasp85/gganimate')
-```
+
 
 
 ```{r, package_chunk, echo = FALSE}
@@ -36,11 +34,12 @@ library(moderndive)
 library(blscrapeR)
 library(tidyverse)
 library(tweenr)
-library(gganimate)
+library(openxlsx)
+library(lubridate)
 ```
 
 ```{r}
-Powerball <- read_csv("WinningNumbers.csv")
+Powerball <- read.csv("WinningNumbers.csv")
 ```
 
 ```{r}
@@ -80,6 +79,173 @@ powerball <- data.frame(drawdate, drawday, white1, white2, white3, white4, white
 powerball
 ```
 
+
+Packages:
+
+```{r}
+library(dplyr)
+library(XML)
+library(stringr)
+library(blscrapeR)
+library(openxlsx)
+library(tidyr)
+library(lubridate)
+
+```
+
+
+Initial Loading of Powerball dataset:
+
+```{r}
+#loading winning numbers dataset
+winningnumbers <- read.csv("https://data.ny.gov/api/views/d6yy-54nr/rows.csv?accessType=DOWNLOAD")
+
+winningnumbers
+
+#loading jackpot vals
+url <- "http://www.lottofactor.com/script/jackpot_history/draw_date/101"
+
+jackpot_vals <- readHTMLTable(url)[[18]] %>% 
+  mutate_all(funs(str_replace(., pattern = "Â", replacement = ""))) %>% 
+  mutate_all(funs(str_trim(., "left")))
+
+#renaming the variables
+jackpot_vals <- dplyr::rename(jackpot_vals, drawdate = `Â Draw Date`)
+
+jackpot_vals <- dplyr::rename(jackpot_vals, Change = `Â Change`)
+
+jackpot_vals <- dplyr::rename(jackpot_vals, Jackpot.Amount = `Â Jackpot Amount`)
+
+# adjusting inflation
+inflation_adj <- inflation_adjust(2019)
+
+# editing winning numbers
+winningnumbers <- winningnumbers %>% separate(Winning.Numbers, into = c("white1", "white2", "white3", "white4", "white5", "powerball"), sep = " ")
+
+winningnumbers <- dplyr::rename(winningnumbers, drawdate = Draw.Date)
+
+
+#editing jackpot vals to begin to create new dataset
+jackpot_vals <- jackpot_vals %>% separate("drawdate", into = c("drawday", "drawdate"), sep = " ")
+
+jackpot_vals$Change = gsub("\\$", "", jackpot_vals$Change)
+jackpot_vals$Change = gsub("Million", "", jackpot_vals$Change)
+
+jackpot_vals$Jackpot.Amount = gsub("\\$", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount = gsub("Million", "", jackpot_vals$Jackpot.Amount)
+jackpot_vals$Jackpot.Amount <- as.numeric(jackpot_vals$Jackpot.Amount)
+
+jackpot_vals <- dplyr::rename(jackpot_vals, jackpot_value = Jackpot.Amount)
+
+winningnumbers
+
+jackpot_vals
+
+
+```
+
+Creating dataset "powerball"
+
+```{r}
+jackpot_vals$drawdate <- as.Date(jackpot_vals$drawdate, "%m/%d/%Y")
+jackpot_vals
+
+winningnumbers$drawdate <- as.Date(winningnumbers$drawdate, "%m/%d/%Y")
+winningnumbers
+
+jackpot_vals$drawdate <- ymd(jackpot_vals$drawdate)
+jackpot_vals <- jackpot_vals %>%
+  select(-Change)
+
+
+winningnumbers$drawdate <- ymd(winningnumbers$drawdate)
+winningnumbers <- winningnumbers %>%
+  select(-Multiplier)
+
+
+
+
+```
+
+
+```{r}
+drawdate <- c("2010-01-02", "2010-01-06", "2010-01-09", "2010-01-13", "2010-01-16", "2010-01-20", "2010-01-23", "2010-01-27", "2010-01-30")
+white1 <- c(3, 20, 20, 8, 7, 15, 15, 6, 6)
+white2 <- c(7, 27, 41, 11, 8, 32, 16, 15, 26)
+white3 <- c(23, 29, 44, 15, 23, 43, 20, 20, 35)
+white4 <- c(27, 56, 50, 32, 41, 44, 42, 26, 47)
+white5 <- c(42, 58, 54, 50, 55, 46, 53, 31, 48)
+powerball <- c(37, 31, 22, 27, 23, 19, 17, 9, 21)
+
+powerball2 <- data.frame(drawdate, white1, white2, white3, white4, white5, powerball)
+powerball2$drawdate <- as.Date(powerball2$drawdate)
+powerball2$drawdate <- ymd(powerball2$drawdate)
+
+winningnumbers$white1 <- as.numeric(winningnumbers$white1)
+winningnumbers$white2 <- as.numeric(winningnumbers$white2)
+winningnumbers$white3 <- as.numeric(winningnumbers$white3)
+winningnumbers$white4 <- as.numeric(winningnumbers$white4)
+winningnumbers$white5 <- as.numeric(winningnumbers$white5)
+winningnumbers$powerball <- as.numeric(winningnumbers$powerball)
+winningnumbers
+
+powerball1 <- rbind(winningnumbers, powerball2)
+powerball1
+```
+
+
+#adding 2010 data
+
+```{r}
+jackpot_vals <- jackpot_vals
+
+powerball <- left_join(powerball1, jackpot_vals, by = "drawdate")
+powerball
+```
+
+
+```{r}
+
+powerball <- powerball %>%
+  mutate(year = substr(drawdate, 1, 4))
+powerball
+```
+
+```{r}
+inflation_adj <- inflation_adjust(2019)
+
+inflation_adj <- inflation_adj%>%
+  select(-avg_cpi, -base_year, -pct_increase)
+
+inflation_adj
+```
+
+```{r}
+powerball <- left_join(powerball, inflation_adj, by = "year", match = "all")
+
+powerballfinal <- powerball %>%
+  mutate(jackpot_value_adj = (jackpot_value / adj_value))
+
+powerballfinal
+```
+
+```{r}
+
+library(ggpmisc)
+
+jackpotgraph <- ggplot(powerballfinal, aes(x = drawdate, y = jackpot_value)) + 
+  geom_area(fill= "#FC4E07",
+            alpha = 0.5) + 
+  stat_smooth(colour="green")+ 
+  theme_classic()
+
+jackpotgraph
+```
+
+```{r}
+
+
+```
 
 
 <html> 
