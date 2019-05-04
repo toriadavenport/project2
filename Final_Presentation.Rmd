@@ -333,15 +333,13 @@ pop_tot_pop <- read_excel(destfile, sheet = 8)
 
 ## Background!
 
-Any background info or blurbs Julia wants to say here
+For this section we took the population ratios for most of the countries across the world and made them into a consumable format.
 
 ## Age ternary plots: Background
 
-+ Choices made
++ To create these plots, all the data had to come together into one dataframe. 
 
-+ blah blah 
-
-## Age ternary plots
+## A look at the population dataframe
 
 ```{r, include = FALSE}
 population_0_4 <- rename(pop_0_4, "country" = "Total 0-4 years (%)") %>%
@@ -387,8 +385,14 @@ population <- full_join(population_0_59, population_60_plus, by = c("country", "
   rename("odr" = "pct60plus/pct15to59") %>%
   mutate((pct0to14 + pct60plus) / pct15to59) %>%
   rename("tdr" = "(pct0to14 + pct60plus)/pct15to59")
+
 ```
 
+```{r}
+glimpse(population)
+```
+
+## Age ternary plots
 
 ```{r, echo = FALSE}
 population_usa <- filter(population, country == "United States")
@@ -424,9 +428,11 @@ ggtern(population_usa, aes(x = pct0to14, y = pct15to59, z = pct60plus)) +
 
 ## Dependency Ratios: Background
 
-+ choices
++ For the dependency ratios, we just wanted to look at the predicted year 2020.
 
-+ blah
++ There were a couple places on the original population dataframe that were not really countries, so they were dropped. (Channel Islands; 	Hong Kong, China; Macao, China; Netherlands Antilles; West Bank and Gaza)
+
++ You will also find a very obvious missing country on the maps and that is because South Sudan was not founded until 2011
 
 ## Dependency Ratios: 
 
@@ -479,7 +485,6 @@ ggplot() +
         ,axis.text = element_blank()
         ,axis.title = element_blank()
         ,axis.ticks = element_blank()
-        ,legend.position = "none"
         ) 
 ```
 
@@ -499,8 +504,9 @@ ggplot() +
         ,axis.text = element_blank()
         ,axis.title = element_blank()
         ,axis.ticks = element_blank()
-        ,legend.position = "none"
-        )
+        ) +
+  annotate("text", x = 20, y = -30, label = "watch Africa change", color = "white") +
+  annotate("text", x = -100, y = 50, label = "watch America change", color = "white")
 ```
 
 ## Dependency Ratios: 
@@ -519,7 +525,7 @@ ggplot() +
         ,axis.text = element_blank()
         ,axis.title = element_blank()
         ,axis.ticks = element_blank()
-        ,legend.position = "none"
+        
         )
 ```
 
