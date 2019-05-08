@@ -2,7 +2,10 @@
 title: "Data Science 1 Project"
 author: "Julia Urh, Maria Christeson, Toria Davenport"
 date: '`r format(Sys.time(), "%B %d, %Y @ %I:%M %p")`'
-output: ioslides_presentation
+output: 
+  ioslides_presentation:
+  theme: yeti
+  highlight: textmate
 ---
 
 ```{r setup, include=FALSE}
@@ -148,6 +151,13 @@ powerballfinal <- powerball %>%
 ## What *is* the powerball lottery?:
 
 + The numbers available  for the white balls were **below *50* from the start until approximately 2001**, **below *60* until 2014**, and became ***69* in 2015**. The powerball options show the opposite pattern, where they were **above *40* until 2009**, **above *30* until 2014**, and ***26* afterwards.**
+
+
+## Dataset:
+
+```{r, echo = FALSE}
+glimpse(powerballfinal)
+```
 
 
 ## Values of the Lottery Over Time: Background
@@ -530,3 +540,8 @@ ggplot() +
 ```
 
 # Questions?
+
+```{r, include = FALSE}
+sessionInfo()
+```
+
